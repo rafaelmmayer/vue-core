@@ -1,26 +1,34 @@
 <script setup>
-import { defineProps, onMounted, ref,inject } from 'vue'
+import { onMounted, onUpdated, ref, inject, watch } from 'vue'
 import DeadLine from './DeadLine.vue';
 
 const globalStyles = inject('globalStyles')
 
 const props = defineProps({
-    task: Object
+    task: Object,
+    userUpdatedCount: Number
 })
 
 const top = ref(0)
 const left = ref(0)
 const width = ref(0)
 
+watch(() => props.userUpdatedCount, ()  => {
+    load()
+})
 onMounted(() => {
+    load()
+})
+function load() {
     const taskElement = document.getElementById(props.task.Id)
     const startDateEl = document.getElementById(props.task.StartDateStr)
     const endDateEl = document.getElementById(props.task.EndDateStr)
+    const timeLineEl = document.getElementById('users-container')
 
-    top.value = taskElement.getBoundingClientRect().top - (globalStyles.headerViewHeight + globalStyles.headerGanttHeight)
+    top.value = taskElement.getBoundingClientRect().top - (globalStyles.headerViewHeight + globalStyles.headerGanttHeight - timeLineEl.scrollTop)
     left.value = startDateEl.getBoundingClientRect().left - globalStyles.usersGanttWidht
     width.value = endDateEl.getBoundingClientRect().right - startDateEl.getBoundingClientRect().left
-})
+}
 </script>
 
 <template>
@@ -48,6 +56,6 @@ onMounted(() => {
     margin-left: 8px;
     margin-right: 8px;
     background-color: rgb(0 0 0);
-    border-radius: 0.5rem/* 8px */;
+    border-radius: 8px;
 }
 </style>

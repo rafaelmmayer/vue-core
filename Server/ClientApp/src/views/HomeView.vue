@@ -17,11 +17,11 @@ const { headerViewHeight, headerGanttHeight } = inject('globalStyles')
 const { monthsArr } = inject('appGlobalConfigs')
 
 const taskHeader = taskHeaderStore()
-
 const months = ref([])
 const dates = ref([])
 const users = ref([])
 const overlayVisibility = ref(false)
+const updatedTasksUser = ref(0)
 
 onUpdated(() => {
 	const daysContainer = document.getElementById('days')
@@ -36,7 +36,7 @@ onUnmounted(() => {
 	document.getElementById('tasks-timeline-container').removeEventListener('scroll', onTaskTimeLineScroll)
 })
 onMounted(() => {
-	users.value = usersDb
+	users.value = usersDb.reverse()
 		.map(u => {
 			const tasks = u.Tasks.map(t => {
 				const startDate = new Date(t.StartDate ?? Date.now())
@@ -56,6 +56,7 @@ onMounted(() => {
 			})
 			return {
 				...u,
+				tasksVisible: true,
 				Tasks: tasks
 			}
 		})
@@ -127,7 +128,23 @@ function getDateStr(date) {
 function handleClickBtnUnassignedTasks() {
 	overlayVisibility.value = !overlayVisibility.value
 }
-function handle
+function handleEmitClickUser(value) {
+	let updated = false
+	users.value = users.value.map(u => {
+		if (u.Id == value.userId && u.Tasks.length > 0) {
+			updated = true
+			console.log(u)
+			return {
+				...u,
+				tasksVisible: value.tasksVisible
+			}
+		}
+		return u
+	})
+	if (updated) {
+		updatedTasksUser.value += 1
+	}
+}
 </script>
 
 <template>
@@ -169,8 +186,8 @@ function handle
 				<div id="users-container" class="max-height users-container">
 					<div id="users">
 						<div v-for="user in users" :key="user.Id" :id="user.Id">
-							<UserComponent :user-name="user.Name" />
-							<div :id="'task-container-user-' + user.Id">
+							<UserComponent :user-name="user.Name" :user-id="user.Id" @visibility-user="handleEmitClickUser" />
+							<div v-if="user.tasksVisible" :id="'task-container-user-' + user.Id">
 								<TaskUser v-for="task in user.Tasks" :task="task" :user-id="user.Id" />
 							</div>
 						</div>
@@ -180,8 +197,8 @@ function handle
 					<div id="tasks-timeline" class="tasks-timeline">
 						<DividerDate v-for="date in dates" :date="date"/>
 						<div v-for="user in users" :key="user.Id">
-							<DividerUser :user-id="user.Id"/>
-							<TaskTimeLine v-for="task in user.Tasks" :task="task"/>
+							<DividerUser :user-id="user.Id" :user-updated-count="updatedTasksUser"/>
+							<TaskTimeLine v-if="user.tasksVisible" v-for="task in user.Tasks" :task="task" :user-updated-count="updatedTasksUser"/>
 						</div>
 					</div>
 				</div>

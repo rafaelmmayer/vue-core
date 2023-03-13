@@ -33,9 +33,7 @@ function loadTaskInterectTask() {
             manualStart: true,
             listeners: {
                 start (event) {
-                    if(!isFixed) {
-                        event.target.style.top = (event.client.y - 55) + 'px'
-                    }
+                    event.target.style.top = (event.client.y - 55) + 'px'
                     event.target.style.left = (event.client.x) + 'px'
                 },
                 move (event) {

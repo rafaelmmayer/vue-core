@@ -1,20 +1,24 @@
 <script setup>
-import { ref, computed, inject, defineEmits } from 'vue'
+import { ref, computed, inject } from 'vue'
 
 const { userHeight } = inject('globalStyles')
 
 const props = defineProps({
-    userName: String
+    userName: String,
+    userId: String
 })
 
-const tasksVisible = ref(false)
+const emit = defineEmits(['visibilityUser'])
+
+const tasksVisible = ref(true)
 
 const iconButton = computed(() => {
-    return tasksVisible.value ? 'mdi-chevron-right' : 'mdi-chevron-down' 
+    return tasksVisible.value ? 'mdi-chevron-down' : 'mdi-chevron-right' 
 })
 
 function handleBtnClick() {
     tasksVisible.value = !tasksVisible.value
+    emit('visibilityUser', { userId: props.userId, tasksVisible: tasksVisible.value })
 }
 </script>
 

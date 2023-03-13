@@ -1,19 +1,27 @@
 <script setup>
-import { onMounted, defineProps, ref, inject } from 'vue'
+import { onMounted, ref, inject, watch } from 'vue'
 
 const globalStyles = inject('globalStyles')
 
 const props = defineProps({
-    userId: String
+    userId: String,
+    userUpdatedCount: Number
 })
 
 const top = ref(0)
 
-onMounted(() => {
-    const userElement = document.getElementById(props.userId)
-
-    top.value = userElement.getBoundingClientRect().top - (globalStyles.headerViewHeight + globalStyles.headerGanttHeight)
+watch(() => props.userUpdatedCount, () => {
+    loadComponent()
 })
+onMounted(() => {
+    loadComponent()
+})
+function loadComponent() {
+    const userElement = document.getElementById(props.userId)
+    const timeLineEl = document.getElementById('users-container')
+
+    top.value = userElement.getBoundingClientRect().top - (globalStyles.headerViewHeight + globalStyles.headerGanttHeight - timeLineEl.scrollTop)
+}
 </script>
 
 <template>
